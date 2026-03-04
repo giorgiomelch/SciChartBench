@@ -1,0 +1,11 @@
+*.jpg
+*.png
+*.json
+*.txt
+ChartQA Dataset/
+
+.vscode/
+
+__pycache__/
+
+html_reports/
