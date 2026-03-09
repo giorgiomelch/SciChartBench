@@ -5,5 +5,5 @@
 *.html
 
 .vscode/
-
+src/weights/*
 __pycache__/
