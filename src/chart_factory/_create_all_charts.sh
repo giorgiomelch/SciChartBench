@@ -1,17 +1,7 @@
 #!/bin/bash
+# Generate synthetic charts for all 9 types.
+# Run from the project root: bash src/chart_factory/_create_all_charts.sh
 
 NUM_CHARTS=50
 
-echo "Avvio generazione di $NUM_CHARTS grafici a barre..."
-echo "$NUM_CHARTS" | python chart_factory/bar_chart_generator.py
-echo "----------------------------------------"
-
-echo "Avvio generazione di $NUM_CHARTS grafici a torta..."
-echo "$NUM_CHARTS" | python chart_factory/pie_chart_generator.py
-echo "----------------------------------------"
-
-echo "Avvio generazione di $NUM_CHARTS grafici a linee..."
-echo "$NUM_CHARTS" | python chart_factory/line_chart_generator.py
-echo "----------------------------------------"
-
-echo "Tutte le generazioni sono state completate."
+python src/chart_factory/generate_all.py --n "$NUM_CHARTS" --types all
