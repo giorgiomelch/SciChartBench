@@ -13,7 +13,6 @@ from src.utils.schema_json import SCHEMA2CHARTCLASS
 
 MAX_SIZE = 768
 
-
 class BaseLLMClient(ABC):
     @abstractmethod
     def extract_data(self, prompt: str, image_bytes: bytes, schema=None) -> str:
@@ -51,30 +50,30 @@ class OpenAIClient(BaseLLMClient):
         base64_image = base64.b64encode(image_bytes).decode("utf-8")
         params = {
             "model": self.model_name,
-            "input": [
+            "messages": [
                 {
                     "role": "user",
                     "content": [
-                        {"type": "input_text", "text": prompt},
+                        {"type": "text", "text": prompt},
                         {
-                            "type": "input_image",
-                            "image_url": f"data:image/png;base64,{base64_image}"
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/png;base64,{base64_image}"}
                         }
                     ]
                 }
             ]
         }
         if schema is not None:
-            params["text"] = {
-                "format": {
-                    "type": "json_schema",
+            params["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
                     "name": schema["name"],
-                    "schema": schema["schema"]
+                    "schema": schema["schema"],
+                    "strict": True
                 }
             }
-        response = self.client.responses.create(**params)
-
-        return response.output_text
+        response = self.client.chat.completions.create(**params)
+        return response.choices[0].message.content
 
 
 class ChartToTableProcessor:
@@ -103,7 +102,7 @@ class ChartToTableProcessor:
                 f.write(text)
             print(f"JSON non valido salvato in {raw_file.name}")
 
-    def process_folder(self, input_path: Path, dataset_type: str):
+    def process_folder(self, input_path: Path):
         if not input_path.exists():
             print(f"Percorso {input_path} non trovato.")
             return
@@ -112,14 +111,14 @@ class ChartToTableProcessor:
             if img_path.suffix.lower() not in ['.jpg', '.jpeg', '.png']:
                 continue
 
-            chart_class = img_path.parent.name if dataset_type == "synthetic" else img_path.parent.parent.name
+            chart_class = img_path.parent.name
             
             prompt = PROMPT2CHARTCLASS.get(chart_class)
             if not prompt: continue
 
             # Costruisci il path di output relativo
             rel_path = img_path.relative_to(input_path)
-            output_file = self.output_base_path / dataset_type / rel_path.with_suffix('.json')
+            output_file = self.output_base_path / input_path.name / rel_path.with_suffix('.json')
 
             if output_file.exists():
                 continue
@@ -133,7 +132,7 @@ class ChartToTableProcessor:
             except Exception as e:
                 print(f"Errore su {img_path.name}: {e}")
 
-def ask_vllm(provider, model_name):
+def ask_vllm(provider, model_name, path_to_dir_target):
     if provider.lower() == "gemini":
         client = GeminiClient(model_name=model_name)
     elif provider.lower() == "openai":
@@ -141,7 +140,9 @@ def ask_vllm(provider, model_name):
     else:
         print("Provider non presente nella lista.")
         return
-
+    if not Path(path_to_dir_target).exists():
+        print(f"Percorso {path_to_dir_target} non trovato.")
+        return
     # Definizione percorso di output basato sul modello
     output_path = Path(f"outputs/predictions/{model_name}")
     
@@ -149,10 +150,5 @@ def ask_vllm(provider, model_name):
 
     # Esecuzione sui dataset
     print(f"Avvio benchmark per {provider} ({model_name})...")
-    
-    # Processa dataset PMC
-    #processor.process_folder(Path("data/images/pmc"), "pmc")
-    # Processa dataset Synthetic
-    processor.process_folder(Path("data/images/synthetic"), "synthetic")
-
+    processor.process_folder(Path(path_to_dir_target))
     print("Benchmark completato.")

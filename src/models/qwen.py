@@ -4,7 +4,11 @@ from transformers import Qwen2VLForConditionalGeneration, AutoProcessor, BitsAnd
 from qwen_vl_utils import process_vision_info
 from pathlib import Path
 from huggingface_hub import snapshot_download
-from src.utils.prompts import *
+from src.utils.prompts import PROMPT2CHARTCLASS, PROMPT_AreaLineBarHistogram
+from src.config import WEIGHTS_DIR, IMAGES_DIR, PREDICTIONS_DIR
+
+
+MAX_SIDE_LIMIT = 768
 
 QWEN_MODELS = {
     "2B": "Qwen/Qwen2-VL-2B-Instruct",
@@ -15,7 +19,7 @@ QWEN_MODELS = {
 
 def get_local_path(tier):
     """Restituisce il percorso locale in base alla taglia scelta."""
-    return Path(f"./src/weights/Qwen2-VL-{tier}-Instruct")
+    return WEIGHTS_DIR / f"Qwen2-VL-{tier}-Instruct"
 
 def download_qwen_model(tier="2B"):
     """Scarica il modello specificato se non è già presente localmente."""
@@ -38,30 +42,35 @@ def download_qwen_model(tier="2B"):
     print(f"Download completato e salvato in {output_path}")
     return str(output_path)
 
-def setup_qwen2_vl(tier="2B", max_pixels_limit=400 * 28 * 28):
+def setup_qwen2_vl(tier="2B", use_4bit=True):
     """
     Carica il modello Qwen2-VL a 4-bit specificato dal parametro tier.
     """
     model_id = download_qwen_model(tier)
     
-    quantization_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_compute_dtype=torch.float16,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4"
-    )
+    model_kwargs = {
+        "device_map": "auto",
+        "trust_remote_code": True
+    }
+    if use_4bit:
+        print(f"\nCaricamento di Qwen2-VL ({tier}) a 4-bit in corso...")
+        model_kwargs["quantization_config"] = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4"
+        )
+    else:
+        dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+        print(f"\nCaricamento di Qwen2-VL ({tier}) a piena precisione ({dtype}) in corso...")
+        model_kwargs["torch_dtype"] = dtype
 
-    print(f"\nCaricamento di Qwen2-VL ({tier}) a 4-bit in corso...")
-    model = Qwen2VLForConditionalGeneration.from_pretrained(
-        model_id,
-        quantization_config=quantization_config,
-        device_map="auto"
-    )
+    model = Qwen2VLForConditionalGeneration.from_pretrained(model_id, **model_kwargs)
 
     processor = AutoProcessor.from_pretrained(
         model_id,
         min_pixels=256 * 28 * 28, 
-        max_pixels=max_pixels_limit 
+        max_pixels=MAX_SIDE_LIMIT * MAX_SIDE_LIMIT
     )
     
     return model, processor
@@ -96,7 +105,7 @@ def extract_table_qwen(model, processor, image_path, prompt_text):
     with torch.no_grad():
         generated_ids = model.generate(
             **inputs, 
-            max_new_tokens=1024,
+            max_new_tokens=10_000,
             do_sample=False
         )
 
@@ -116,8 +125,8 @@ def run_batch_inference(model, processor, tier="2B"):
     Itera su tutte le immagini, seleziona il prompt in base alla chart class, 
     genera i JSON e replica l'alberatura delle cartelle.
     """
-    input_base_dir = Path("data/images")
-    output_base_dir = Path(f"outputs/predictions/Qwen{tier}")
+    input_base_dir = IMAGES_DIR
+    output_base_dir = PREDICTIONS_DIR / f"Qwen{tier}"
     
     if not input_base_dir.exists():
         print(f"Errore: La directory di input {input_base_dir} non esiste.")
@@ -174,10 +183,11 @@ def run_batch_inference(model, processor, tier="2B"):
             except Exception as e:
                 print(f"Errore critico durante l'elaborazione di {img_path}: {e}")
 
+def ask_qwen(tier="2B", quantizzazione=True):
+    modello, processore = setup_qwen2_vl(tier=tier, use_4bit=quantizzazione)
+    
+    run_batch_inference(modello, processore, tier=tier)
+    print(f"\nQuen{tier}: inferenza batch completata.")
+
 if __name__ == "__main__":
-    TIER_SCELTO = "2B"
-    
-    modello, processore = setup_qwen2_vl(tier=TIER_SCELTO)
-    
-    run_batch_inference(modello, processore, tier=TIER_SCELTO)
-    print("\nInferenza batch completata.")
+    ask_qwen()
