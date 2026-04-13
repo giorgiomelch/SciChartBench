@@ -1,214 +1,184 @@
 PROMPT_AreaLineBarHistogram = """
-Sei un analista dati esperto nell'estrazione di informazioni visive. 
-Il tuo compito è analizzare l'immagine del grafico fornita e ricostruire la tabella dati sottostante estraendo i valori esatti o, 
-se non esplicitati, compiendo la stima più accurata possibile in base agli assi.
+You are an expert data analyst in extracting visual information. 
+Your task is to analyze the provided chart image and reconstruct the underlying data table by extracting the exact values or, 
+if not explicitly stated, making the most accurate estimate possible based on the axes.
+In the presence of two Y-axes, exclusively extract the data series referring to the left axis and completely ignore the series referring to the right axis.
 
-Restituisci l'output ESCLUSIVAMENTE in formato JSON valido, senza testo aggiuntivo o formattazione markdown esterna al JSON.
-Il JSON deve rispettare rigorosamente la seguente struttura:
+Return the output EXCLUSIVELY in valid JSON format, without any additional text or markdown formatting outside the JSON.
+The JSON must strictly adhere to the following structure:
 
 {
-    "chart_title": "Titolo principale del grafico (null se assente)",
-    "x_axis_label": "Etichetta dell'asse X (null se assente)",
-    "y_axis_label": "Etichetta dell'asse Y (null se assente)",
-    "categorical_axis": "Specifica quale asse rappresenta le categorie (variabile indipendente). Rispondi ESCLUSIVAMENTE con la stringa 'x' oppure 'y'. Se il grafico non ha un asse categorico (es. scatter plot con due assi numerici), restituisci null.",
+    "chart_title": "Main title of the chart (null if absent)",
+    "x_axis_label": "X-axis label (null if absent)",
+    "y_axis_label": "Y-axis label (null if absent)",
+    "categorical_axis": "Specify which axis represents the categories (independent variable). Answer EXCLUSIVELY with the string 'x' or 'y'. If the chart does not have a categorical axis (e.g., scatter plot with two numerical axes), return null.",
     "data_points": [
         {
-        "series_name": "Nome della serie (es. voce della legenda). Usa 'Main' se c'è una sola serie senza legenda.",
-        "x_value": "Categoria o valore numerico sull'asse X.",
-        "y_value": "Valore numerico sull'asse Y."
+        "series_name": "Name of the series (e.g., legend entry). Use 'Main' if there is only one series without a legend.",
+        "x_value": "Category or numerical value on the X-axis.",
+        "y_value": "Category or numerical value on the Y-axis."
         }
-    ],
-    "comment": "Eventuale nota tecnica sull'estrazione o null se non necessaria."
+    ]
 }
 """
+
 PROMPT_Scatter = """
-Sei un analista dati esperto nell'estrazione di informazioni visive. 
-Il tuo compito è analizzare l'immagine del grafico scatter fornita e ricostruire la tabella dati sottostante estraendo i valori esatti o, 
-se non esplicitati, compiendo la stima più accurata possibile in base agli assi.
+You are an expert data analyst in extracting visual information. 
+Your task is to analyze the provided scatter plot image and reconstruct the underlying data table by extracting the exact values or, 
+if not explicitly stated, making the most accurate estimate possible based on the axes.
+In the presence of two Y-axes, exclusively extract the data series referring to the left axis and completely ignore the series referring to the right axis.
 
-Restituisci l'output ESCLUSIVAMENTE in formato JSON valido, senza testo aggiuntivo o formattazione markdown esterna al JSON.
-Il JSON deve rispettare rigorosamente la seguente struttura:
+Return the output EXCLUSIVELY in valid JSON format, without any additional text or markdown formatting outside the JSON.
+The JSON must strictly adhere to the following structure:
 
 {
-    "chart_title": "Titolo principale del grafico (null se assente)",
-    "x_axis_label": "Etichetta dell'asse X (null se assente)",
-    "y_axis_label": "Etichetta dell'asse Y (null se assente)",
+    "chart_title": "Main title of the chart (null if absent)",
+    "x_axis_label": "X-axis label (null if absent)",
+    "y_axis_label": "Y-axis label (null if absent)",
     "data_points": [
         {
-        "series_name": "Nome della serie (es. voce della legenda). Usa 'Main' se c'è una sola serie senza legenda.",
-        "x_value": "Categoria o valore numerico sull'asse X.",
-        "y_value": "Valore numerico sull'asse Y."
+        "series_name": "Name of the series (e.g., legend entry). Use 'Main' if there is only one series without a legend.",
+        "x_value": "Category or numerical value on the X-axis.",
+        "y_value": "Numerical value on the Y-axis."
         }
-    ],
-    "comment": "Eventuale nota tecnica sull'estrazione o null se non necessaria."
+    ]
 }
 """
+
 PROMPT_Radar = """
-Sei un analista dati esperto nell'estrazione di informazioni visive. 
-Il tuo compito è analizzare l'immagine del grafico fornita e ricostruire la tabella dati sottostante estraendo i valori esatti o, 
-se non esplicitati, compiendo la stima più accurata possibile in base agli assi.
+You are an expert data analyst in extracting visual information. 
+Your task is to analyze the provided chart radar image and reconstruct the underlying data table by extracting the exact values or, 
+if not explicitly stated, making the most accurate estimate possible based on the axes.
 
-Restituisci l'output ESCLUSIVAMENTE in formato JSON valido, senza testo aggiuntivo o formattazione markdown esterna al JSON.
-Il JSON deve rispettare rigorosamente la seguente struttura:
+Return the output EXCLUSIVELY in valid JSON format, without any additional text or markdown formatting outside the JSON.
+The JSON must strictly adhere to the following structure:
 
 {
-    "chart_title": "Titolo principale del grafico (null se assente)",
+    "chart_title": "Main title of the chart (null if absent)",
     "data_points": [
         {
-            "series_name": "Nome della serie (es. voce della legenda). Usa 'Main' se c'è una sola serie.",
-            "x_value": "Usa il nome del vertice/variabile.",
-            "y_value": "Valore numerico corrispondente.",
+            "series_name": "Name of the series (e.g., legend entry). Use 'Main' if there is only one series.",
+            "x_value": "Use the name of the vertex/variable.",
+            "y_value": "Corresponding numerical value."
         }
-    ],
-    "comment": "Eventuale nota tecnica sull'estrazione o null se non necessaria."
+    ]
 }
 """
+
 PROMPT_Pie = """
-Sei un analista dati esperto nell'estrazione di informazioni visive. 
-Il tuo compito è analizzare l'immagine del grafico fornita e ricostruire la tabella dati sottostante estraendo i valori esatti o, 
-se non esplicitati, compiendo la stima più accurata possibile in base agli assi.
+You are an expert data analyst in extracting visual information. 
+Your task is to analyze the provided chart pie image and reconstruct the underlying data table by extracting the exact values or, 
+if not explicitly stated, making the most accurate estimate possible based on the axes.
 
-Restituisci l'output ESCLUSIVAMENTE in formato JSON valido, senza testo aggiuntivo o formattazione markdown esterna al JSON.
-Il JSON deve rispettare rigorosamente la seguente struttura:
-
-{
-    "chart_title": "Titolo principale del grafico (null se assente)",
-    "data_points": [
-        {
-            "series_name": "Nome della serie (es. voce della legenda). Usa 'Main' se c'è una sola serie.",
-            "x_value": "Usa il nome della fetta.",
-            "y_value": "Valore numerico corrispondente (percentuale, conteggio o punteggio).",
-        }
-    ],
-    "comment": "Eventuale nota tecnica sull'estrazione o null se non necessaria."
-}
-"""
-PROMPT_Venn = """
-Sei un analista dati esperto nell'estrazione di informazioni visive. 
-Il tuo compito è analizzare l'immagine del grafico fornita e ricostruire la tabella dati sottostante estraendo i valori esatti o, 
-se non esplicitati, compiendo la stima più accurata possibile in base agli assi.
-
-Restituisci l'output ESCLUSIVAMENTE in formato JSON valido, senza testo aggiuntivo o formattazione markdown esterna al JSON.
-Il JSON deve rispettare rigorosamente la seguente struttura:
+Return the output EXCLUSIVELY in valid JSON format, without any additional text or markdown formatting outside the JSON.
+The JSON must strictly adhere to the following structure:
 
 {
-    "chart_title": "Titolo principale del grafico (null se assente)",
+    "chart_title": "Main title of the chart (null if absent)",
     "data_points": [
         {
-            "series_name": "Nome della serie (es. voce della legenda). Usa 'Main' se c'è una sola serie. Per il diagramma di Venn indica il nome dell'insieme o l'intersezione (es. 'A', 'B', 'A interseca B').",
-            "x_value": "Usa il nome del vertice/variabile.",
-            "y_value": "Valore numerico corrispondente.",
+            "series_name": "Name of the series (e.g., legend entry). Use 'Main' if there is only one series.",
+            "x_value": "Use the slice name.",
+            "y_value": "Corresponding numerical value (percentage, count, or score)."
         }
-    ],
-    "comment": "Eventuale nota tecnica sull'estrazione o null se non necessaria."
+    ]
 }
 """
 
 PROMPT_Box = """
-Sei un analista dati esperto nell'estrazione di informazioni visive. 
-Il tuo compito è analizzare l'immagine del grafico fornita e ricostruire la tabella dati sottostante estraendo i valori esatti o, 
-se non esplicitati, compiendo la stima più accurata possibile in base agli assi.
+You are an expert data analyst in extracting visual information. 
+Your task is to analyze the provided chart box image and reconstruct the underlying data table by extracting the exact values or, 
+if not explicitly stated, making the most accurate estimate possible based on the axes.
+In the presence of two Y-axes, exclusively extract the data series referring to the left axis and completely ignore the series referring to the right axis.
 
-Restituisci l'output ESCLUSIVAMENTE in formato JSON valido, senza testo aggiuntivo, preamboli o commenti se non nel campo apposito "comment".
-Il JSON deve rispettare rigorosamente la seguente struttura standardizzata, che si adatta a diverse tipologie di grafici:
+Return the output EXCLUSIVELY in valid JSON format, without any additional text, preambles, or comments.
+The JSON must strictly adhere to the following standardized structure, which adapts to different types of charts:
 
 {
-    "chart_title": "Titolo principale del grafico (null se assente)",
-    "x_axis_label": "Etichetta dell'asse X (null se assente)",
-    "y_axis_label": "Etichetta dell'asse Y (null se assente)",
-    "categorical_axis": "Specifica quale asse rappresenta le categorie (variabile indipendente). Rispondi ESCLUSIVAMENTE con la stringa 'x' oppure 'y'. Se il grafico non ha un asse categorico (es. scatter plot con due assi numerici), restituisci null.",
+    "chart_title": "Main title of the chart (null if absent)",
+    "x_axis_label": "X-axis label (null if absent)",
+    "y_axis_label": "Y-axis label (null if absent)",
+    "categorical_axis": "Specify which axis represents the categories (independent variable). Answer EXCLUSIVELY with the string 'x' or 'y'. If the chart does not have a categorical axis (e.g., scatter plot with two numerical axes), return null.",
     "data_points": [
         {
-            "series_name": "Nome della serie o gruppo. Usa 'Main' se c'è una sola serie.",
-            "x_value": "Categoria o valore numerico sull'asse X.",
+            "series_name": "Name of the series or group. Use 'Main' if there is only one series.",
+            "x_value": "Category or numerical value on the X-axis.",
             "y_value": {
-                "min": "valore minimo",
-                "q1": "primo quartile (se applicabile, altrimenti null)",
-                "median": "mediana o valore centrale",
-                "q3": "terzo quartile (se applicabile, altrimenti null)",
-                "max": "valore massimo"
+                "min": "minimum value (if applicable, otherwise null)",
+                "q1": "first quartile (if applicable, otherwise null)",
+                "median": "median or central value (if applicable, otherwise null)",
+                "q3": "third quartile (if applicable, otherwise null)",
+                "max": "maximum value (if applicable, otherwise null)"
             }
         }
-    ],
-    "comment": "Eventuale nota tecnica sull'estrazione o null se non necessaria."
+    ]
 }
 """
-PROMPT_Errorpoint = """
-Sei un analista dati esperto nell'estrazione di informazioni visive. 
-Il tuo compito è analizzare l'immagine del grafico fornita e ricostruire la tabella dati sottostante estraendo i valori esatti o, 
-se non esplicitati, compiendo la stima più accurata possibile in base agli assi.
 
-Restituisci l'output ESCLUSIVAMENTE in formato JSON valido, senza testo aggiuntivo, preamboli o commenti se non nel campo apposito "comment".
-Il JSON deve rispettare rigorosamente la seguente struttura standardizzata, che si adatta a diverse tipologie di grafici:
+PROMPT_Errorpoint = """
+You are an expert data analyst in extracting visual information. 
+Your task is to analyze the provided chart error-point image and reconstruct the underlying data table by extracting the exact values or, 
+if not explicitly stated, making the most accurate estimate possible based on the axes.
+In the presence of two Y-axes, exclusively extract the data series referring to the left axis and completely ignore the series referring to the right axis.
+
+Return the output EXCLUSIVELY in valid JSON format, without any additional text, preambles, or comments.
+The JSON must strictly adhere to the following standardized structure, which adapts to different types of charts:
 
 {
-    "chart_title": "Titolo principale del grafico (null se assente)",
-    "x_axis_label": "Etichetta dell'asse X (null se assente)",
-    "y_axis_label": "Etichetta dell'asse Y (null se assente)",
-    "categorical_axis": "Specifica quale asse rappresenta le categorie (variabile indipendente). Rispondi ESCLUSIVAMENTE con la stringa 'x' oppure 'y'. Se il grafico non ha un asse categorico (es. scatter plot con due assi numerici), restituisci null.",
+    "chart_title": "Main title of the chart (null if absent)",
+    "x_axis_label": "X-axis label (null if absent)",
+    "y_axis_label": "Y-axis label (null if absent)",
+    "categorical_axis": "Specify which axis represents the categories (independent variable). Answer EXCLUSIVELY with the string 'x' or 'y'. If the chart does not have a categorical axis (e.g., scatter plot with two numerical axes), return null.",
     "data_points": [
         {
-            "series_name": "Nome della serie o gruppo. Usa 'Main' se c'è una sola serie.",
-            "x_value": "Categoria o valore numerico sull'asse X.",
+            "series_name": "Name of the series or group. Use 'Main' if there is only one series.",
+            "x_value": "Category or numerical value on the X-axis.",
             "y_value": {
-                "min": "valore minimo",
-                "median": "mediana o valore centrale",
-                "max": "valore massimo"
+                "min": "minimum value (null if absent)",
+                "median": "median or central value (null if absent)",
+                "max": "maximum value (null if absent)"
             }
         }
-    ],
-    "comment": "Eventuale nota tecnica sull'estrazione o null se non necessaria."
+    ]
 }
 """
 
 PROMPT_Bubble = """
-Sei un analista dati esperto nell'estrazione di informazioni visive. 
-Il tuo compito è analizzare l'immagine del grafico fornita e ricostruire la tabella dati sottostante estraendo i valori esatti o, 
-se non esplicitati, compiendo la stima più accurata possibile in base agli assi.
+You are an expert data analyst in extracting visual information. 
+Your task is to analyze the provided chart bubble image and reconstruct the underlying data table by extracting the exact values or, 
+if not explicitly stated, making the most accurate estimate possible based on the axes.
+In the presence of two Y-axes, exclusively extract the data series referring to the left axis and completely ignore the series referring to the right axis.
 
-Restituisci l'output ESCLUSIVAMENTE in formato JSON valido, senza testo aggiuntivo, preamboli o commenti se non nel campo apposito "comment".
-Il JSON deve rispettare rigorosamente la seguente struttura standardizzata, che si adatta a diverse tipologie di grafici:
+Return the output EXCLUSIVELY in valid JSON format, without any additional text, preambles, or comments.
+The JSON must strictly adhere to the following standardized structure, which adapts to different types of charts:
 
 {
-    "chart_title": "Titolo principale del grafico (null se assente)",
-    "x_axis_label": "Etichetta dell'asse X (null se assente)",
-    "y_axis_label": "Etichetta dell'asse Y (null se assente)",
+    "chart_title": "Main title of the chart (null if absent)",
+    "x_axis_label": "X-axis label (null if absent)",
+    "y_axis_label": "Y-axis label (null if absent)",
+    "categorical_axis": "Specify which axis represents the categories (independent variable). Answer EXCLUSIVELY with the string 'x' or 'y'. If the chart does not have a categorical axis (e.g., scatter plot with two numerical axes), return null.",
     "data_points": [
         {
-            "series_name": "Nome della serie o voce della legenda. Usa 'Main' se c'è una sola serie.",
-            "x_value": "Valore numerico o categoria sull'asse X.",
-            "y_value": "Valore numerico sull'asse Y.",
-            "z_value": "Valore numerico rappresentato dalla dimensione della bolla."
+            "series_name": "Name of the series or legend entry. Use 'Main' if there is only one series.",
+            "x_value": "Numerical value or category on the X-axis.",
+            "y_value": "Numerical value or category on the Y-axis.",
+            "z_value": "Numerical value represented by the bubble size.",
+            "w_value": "Numerical value represented by the bubble color, null if the color indicates only the category"
         }
-    ],
-    "comment": "Eventuale nota tecnica sull'estrazione o null se non necessaria."
+    ]
 }
 """
 
-PROMPT_Violin = """
-Sei un analista dati esperto. Il tuo compito è analizzare l'immagine del grafico a violino (Violin plot) fornito e ricostruire le informazioni sulla distribuzione.
-Ricorda che la larghezza della figura rappresenta la densità dei dati: le sezioni più larghe indicano un'alta frequenza, mentre le sezioni strette indicano i valori estremi. I quartili non sono calcolabili a vista a meno che non ci sia un indicatore interno.
 
-Restituisci l'output ESCLUSIVAMENTE in formato JSON valido, senza testo aggiuntivo o formattazione markdown esterna al JSON.
-Il JSON deve rispettare rigorosamente la seguente struttura:
-
-{
-    "chart_title": "Titolo principale del grafico (null se assente)",
-    "x_axis_label": "Etichetta dell'asse X (null se assente)",
-    "y_axis_label": "Etichetta dell'asse Y (null se assente)",
-    "data_points": [
-        {
-            "series_name": "Nome della categoria o gruppo sull'asse X.",
-            "x_value": "Valore numerico o categoria sull'asse X.",
-            "y_value": {
-                "min": "Valore sull'asse Y in cui termina la coda inferiore del violino.",
-                "max": "Valore sull'asse Y in cui termina la coda superiore del violino.",
-                "mode": "Valore sull'asse Y in corrispondenza della sezione orizzontalmente più larga del violino (il picco di densità).",
-                "median": "Valore della mediana. Estrailo SOLO se visivamente indicato (es. da un punto bianco o una linea orizzontale interna), altrimenti scrivi tassativamente null."
-            },
-            "z_value": null
-        }
-    ],
-    "comment": "Specifica se la mediana era visibile o se hai potuto estrarre solo la moda e i limiti estremi."
+PROMPT2CHARTCLASS = {
+    "area": PROMPT_AreaLineBarHistogram,
+    "line": PROMPT_AreaLineBarHistogram,
+    "bar": PROMPT_AreaLineBarHistogram,
+    "histogram": PROMPT_AreaLineBarHistogram,      
+    "scatter": PROMPT_Scatter,
+    "radar": PROMPT_Radar,
+    "pie": PROMPT_Pie,
+    "box": PROMPT_Box,
+    "errorpoint": PROMPT_Errorpoint,
+    "bubble": PROMPT_Bubble,           
 }
-"""
