@@ -1,4 +1,5 @@
 *.jpg
+*.jpeg
 *.png
 *.json
 *.txt
@@ -7,3 +8,4 @@
 .vscode/
 src/weights/*
 __pycache__/
+notebooks/ChartQA Dataset/
