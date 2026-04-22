@@ -29,7 +29,7 @@ def download_qwen_model(tier="2B"):
     repo_id = QWEN_MODELS[tier]
     output_path = get_local_path(tier)
     
-    if output_path.exists() and any(output_path.iterdir()):
+    if output_path.exists() and any(output_path.glob("*.safetensors")):
         print(f"Modello {tier} già presente in {output_path}. Skip download.")
         return str(output_path)
         
