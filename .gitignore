@@ -6,6 +6,6 @@
 *.html
 
 .vscode/
-src/weights/*
+weights/
 __pycache__/
-notebooks/ChartQA Dataset/
+notebooks/
