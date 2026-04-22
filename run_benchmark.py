@@ -5,6 +5,9 @@ Uso:
     python run_benchmark.py --model qwen --dataset PMCharts
     python run_benchmark.py --model qwen,internvl --dataset all --drive-path /content/drive/MyDrive/MioProgetto
     python run_benchmark.py --model deplot --evaluate --report
+    python run_benchmark.py --evaluate --metrics --report   # solo valutazione, nessuna inferenza
+    python run_benchmark.py --model openai --dataset PMCharts
+    python run_benchmark.py --model gemini --tier gemini-2.5-flash --dataset PMCharts
 
 Modelli disponibili (open-weight):
     qwen       Qwen2-VL (2B o 7B, default 2B)
@@ -12,13 +15,18 @@ Modelli disponibili (open-weight):
     phi        Phi-3.5-Vision (ottimizzato per Colab)
     deplot     DePlot / Pix2Struct
 
+Modelli disponibili (API):
+    openai     OpenAI GPT-4o (richiede OPENAI_API_KEY). --tier per scegliere il modello (default: gpt-4o)
+    gemini     Google Gemini (richiede GEMINI_API_KEY). --tier per scegliere il modello (default: gemini-2.5-flash)
+
 Argomenti:
-    --model       Modelli da eseguire (virgola-separati o "all")
+    --model       Modelli da eseguire (virgola-separati o "all"). Se omesso, nessuna inferenza viene eseguita.
     --dataset     Dataset da usare: PMCharts, synthetic, arXiv, all (default: PMCharts)
-    --tier        Variante del modello (es. 7B per Qwen, 2.5-8B per InternVL)
+    --tier        Variante del modello (es. 7B per Qwen, gpt-4o-mini per OpenAI)
     --drive-path  Path su Google Drive dove salvare pesi e output
-    --evaluate    Esegui la valutazione dopo le predizioni
-    --report      Genera i report HTML dopo la valutazione
+    --data-path   Path della cartella data/ con images/ e groundtruth/ (utile su Colab)
+    --evaluate    Calcola le metriche RMS e genera i grafici F1
+    --report      Genera i report HTML con confronto predizioni/GT
 """
 
 import argparse
@@ -26,7 +34,7 @@ import os
 import sys
 
 
-AVAILABLE_MODELS = ["qwen", "internvl", "phi", "deplot"]
+AVAILABLE_MODELS = ["qwen", "internvl", "phi", "deplot", "openai", "gemini"]
 AVAILABLE_DATASETS = ["PMCharts", "synthetic", "arXiv"]
 
 
@@ -37,8 +45,9 @@ def parse_args():
     )
     parser.add_argument(
         "--model",
-        default="",
-        help='Modelli da eseguire, virgola-separati o "all". Es: qwen,internvl',
+        default=None,
+        help='Modelli da eseguire, virgola-separati o "all". Es: qwen,internvl. '
+             'Se omesso nessuna inferenza viene eseguita.',
     )
     parser.add_argument(
         "--dataset",
@@ -69,18 +78,20 @@ def parse_args():
     parser.add_argument(
         "--evaluate",
         action="store_true",
-        help="Esegui la valutazione RMS dopo le predizioni.",
+        help="Calcola le metriche RMS e genera i grafici F1 (barplot + facet per numero di elementi).",
     )
     parser.add_argument(
         "--report",
         action="store_true",
-        help="Genera i report HTML.",
+        help="Genera i report HTML con confronto predizioni/GT per ogni immagine.",
     )
     return parser.parse_args()
 
 
-def resolve_models(model_arg: str) -> list[str]:
-    if not model_arg or model_arg.lower() == "all":
+def resolve_models(model_arg: str | None) -> list[str]:
+    if model_arg is None:
+        return []  # nessuna inferenza se --model non è specificato
+    if model_arg.lower() == "all":
         return AVAILABLE_MODELS
     models = [m.strip().lower() for m in model_arg.split(",") if m.strip()]
     unknown = [m for m in models if m not in AVAILABLE_MODELS]
@@ -118,6 +129,11 @@ def main():
     models = resolve_models(args.model)
     datasets = resolve_datasets(args.dataset)
 
+    if not models and not args.evaluate and not args.report:
+        print("[ERRORE] Nessuna operazione specificata. Usa --model, --evaluate o --report.")
+        print("         Esempio: python run_benchmark.py --model qwen --dataset PMCharts")
+        sys.exit(1)
+
     for model_name in models:
         for dataset in datasets:
             dataset_path = IMAGES_DIR / dataset
@@ -147,7 +163,17 @@ def main():
 
             elif model_name == "deplot":
                 from src.models.deplot import DePlot_predict
-                DePlot_predict()
+                DePlot_predict(dataset)
+
+            elif model_name == "openai":
+                from src.models.vllm_client import ask_vllm
+                tier = args.tier or "gpt-4o"
+                ask_vllm(provider="openai", model_name=tier, path_to_dir_target=str(dataset_path))
+
+            elif model_name == "gemini":
+                from src.models.vllm_client import ask_vllm
+                tier = args.tier or "gemini-2.5-flash"
+                ask_vllm(provider="gemini", model_name=tier, path_to_dir_target=str(dataset_path))
 
     if args.evaluate:
         print("\nAvvio valutazione...")
